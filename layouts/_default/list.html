@@ -1,0 +1,6 @@
+{{ define "main" }}
+list page
+  {{ range .Pages }}
+    {{ .Page.Content }}
+  {{ end }}
+{{ end }}
