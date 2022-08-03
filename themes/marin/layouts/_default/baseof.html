@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
-    {{- partial "head.html" . -}}
-    <body>
+    <head>
+        {{- block "title" . }}{{- end }}
+        {{- partial "head.html" . -}}
+    </head>
+    <body class="theme-light">
         {{- partial "header.html" . -}}
         <div id="content">
         {{- block "main" . }}{{- end }}

@@ -1,0 +1,26 @@
+{{ define "title" }}
+<title> {{ .Title }} &middot; {{ .Site.Title }} </title>
+{{ end }}
+
+{{ define "main"}}
+<div class="content {{ if .Params.toc }}toc{{ else }}wide{{ end }}">
+  {{ if .Params.toc }}{{ .TableOfContents }}{{ end }}
+
+  <section class="post">
+    <h1 class="post-title"><a href="{{ .Permalink }}">{{ .Title }}</a></h1>
+    <span class="post-date">{{ .Date.Format "Jan 2, 2006 " }}</span>
+    <div class="post-content">
+      {{ .Content }}
+    </div>
+  </section>
+
+  <section class="pagination clearfix">
+    {{ with .PrevInSection }}
+    <a class="btn previous " href="{{.Permalink}}"> {{ .Title }} </a>
+    {{ end }}
+    {{ with .NextInSection }}
+    <a class="btn next " href="{{.Permalink}}"> {{ .Title }} </a>
+    {{ end }}
+  </section>
+</div>
+{{ end }}
