@@ -1,0 +1,15 @@
+{{ define "title" }}
+<title> {{ .Site.Title }} | Archive </title>
+{{ end }}
+
+{{ define "main" }}
+<section class="archive-list">
+  {{ range where .Site.RegularPages "Type" "page" }}
+    <div class="archive-post">
+        <div>{{.Date.Format "2006-01-02"}}</div>
+        <div class="divider"></div>
+        <a href="{{.Permalink}}">{{.Title}}</a>
+    </div>
+  {{ end }}
+</section>
+{{ end }}

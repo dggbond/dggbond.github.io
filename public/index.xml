@@ -6,5 +6,14 @@
     <description>Recent content on Tilemoon Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language><atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Archive</title>
+      <link>http://example.org/archive/</link>
+      <pubDate>Thu, 04 Aug 2022 11:25:49 +0800</pubDate>
+      
+      <guid>http://example.org/archive/</guid>
+      <description>This page contains an archive of all posts.</description>
+    </item>
+    
   </channel>
 </rss>

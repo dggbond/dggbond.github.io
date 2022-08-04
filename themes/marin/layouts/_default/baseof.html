@@ -4,11 +4,12 @@
         {{- block "title" . }}{{- end }}
         {{- partial "head.html" . -}}
     </head>
-    <body class="theme-light">
+    <body class="theme-dark">
         {{- partial "header.html" . -}}
-        <div id="content">
+        <div id="main">
         {{- block "main" . }}{{- end }}
         </div>
         {{- partial "footer.html" . -}}
+        <script type="text/javascript" src="{{ "js/index.js" | absURL }}"></script>
     </body>
 </html>
