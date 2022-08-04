@@ -12,34 +12,32 @@
 
 
 <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
-<link rel="shortcut icon" href="/favicon.ico">
+<link rel='shortcut icon' type='image/x-icon' href='/images/favicon.ico' />
 </head>
     <body class="theme-light"><header>
   <div class="header-leading space-12">
     <a class="action-btn" href="//github.com/tilemoon" target="_blank">
       <i class="fa fa-github fa-lg" aria-hidden="true"></i>
     </a>
-    <button class="action-btn" target="_blank">
-      <i class="fa fa-moon-o fa-lg" aria-hidden="true"></i>
-    </button>
   </div>
   <div class="header-menus space-24">
     <a class="header-menu-item" href="/">Home</a>
-    <a class="header-menu-item" href="/archive">Posts</a>
+    <a class="header-menu-item" href="/archive">Archive</a>
     <a class="header-menu-item" href="/profile">Profile</a>
   </div>
-  <div class="header-actions space-12"></div>
+  <div class="header-actions space-12">
+    <button id="theme-toggle" class="action-btn" onclick="toggleTheme()">
+      <i class="fa fa-sun-o fa-lg" aria-hidden="true"></i>
+    </button>
+  </div>
 </header>
 <div id="main">
-<section class="">
-  
-    <li>
-        <a href="http://example.org/archive/">2022-08-04 | Archive</a>
-    </li>
+<section class="archive-list">
   
 </section>
 
         </div><div  class="footer">
 </div>
-</body>
+<script type="text/javascript" src="http://example.org/js/index.js"></script>
+    </body>
 </html>
