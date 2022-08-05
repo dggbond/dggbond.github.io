@@ -4,13 +4,15 @@
 
 {{ define "main"}}
 <div class="content">
-  {{ .TableOfContents }}
+  <div class="table-of-content">
+    {{ .TableOfContents }}
+  </div>
 
-  <section class="single-post">
+  <section class="single-post markdown-body">
     <h1 class="single-post-title"><a href="{{ .Permalink }}">{{ .Title }}</a></h1>
     <span class="single-post-date">{{ .Date.Format "2006-01-02 11:11" }}</span>
     <div class="single-post-content">
-      {{ .Content }}
+      {{ .Content | safeHTML }}
     </div>
   </section>
 </div>
