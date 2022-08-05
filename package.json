@@ -1,0 +1,17 @@
+{
+  "name": "tilemoon.github.io",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:tilemoon/tilemoon.github.io.git",
+  "author": "zhengmao <zhengmao0613@163.com>",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "make deploy"
+  },
+  "pre-commit": {
+    "run": "deploy"
+  },
+  "dependencies": {
+    "pre-commit": "1.2.2"
+  }
+}
