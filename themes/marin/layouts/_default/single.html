@@ -3,24 +3,15 @@
 {{ end }}
 
 {{ define "main"}}
-<div class="content {{ if .Params.toc }}toc{{ else }}wide{{ end }}">
-  {{ if .Params.toc }}{{ .TableOfContents }}{{ end }}
+<div class="content">
+  {{ .TableOfContents }}
 
-  <section class="post">
-    <h1 class="post-title"><a href="{{ .Permalink }}">{{ .Title }}</a></h1>
-    <span class="post-date">{{ .Date.Format "2006-01-02 11:11" }}</span>
-    <div class="post-content">
+  <section class="single-post">
+    <h1 class="single-post-title"><a href="{{ .Permalink }}">{{ .Title }}</a></h1>
+    <span class="single-post-date">{{ .Date.Format "2006-01-02 11:11" }}</span>
+    <div class="single-post-content">
       {{ .Content }}
     </div>
-  </section>
-
-  <section class="pagination clearfix">
-    {{ with .PrevInSection }}
-    <a class="btn previous " href="{{.Permalink}}"> {{ .Title }} </a>
-    {{ end }}
-    {{ with .NextInSection }}
-    <a class="btn next " href="{{.Permalink}}"> {{ .Title }} </a>
-    {{ end }}
   </section>
 </div>
 {{ end }}

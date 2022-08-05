@@ -8,6 +8,15 @@
   <div>Then, write the code.</div>
 </div>
 
-<div class="home_posts">
+<div class="posts">
+  {{ $paginator := .Paginate (where .Site.RegularPages "Type" "page") }}
+  {{ partial "pagination.html" . }}
+  {{ range $paginator.Pages }}
+    <div class="home-post">
+      <a class="home-post-title" href="{{ .Permalink }}">{{ .Title }}</a>
+      <div class="home-post-summary">{{ .Summary }}</div>
+      <div class="home-post-date">{{ .Date.Format "2006-01-02" }}</div>
+    </div>
+  {{ end }}
 </div>
 {{ end }}
