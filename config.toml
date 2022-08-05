@@ -1,4 +1,4 @@
-baseURL = 'https://tilemoon.life/'
+baseURL = 'http://example.org/'
 languageCode = 'en-us'
 title = 'Tilemoon Blog'
 theme = 'marin'

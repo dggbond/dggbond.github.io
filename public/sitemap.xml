@@ -2,20 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://tilemoon.life/archive/</loc>
+    <loc>http://example.org/archive/</loc>
     <lastmod>2022-08-04T11:25:49+08:00</lastmod>
   </url><url>
-    <loc>https://tilemoon.life/2022/</loc>
+    <loc>http://example.org/2022/</loc>
     <lastmod>2022-06-15T14:16:39+08:00</lastmod>
   </url><url>
-    <loc>https://tilemoon.life/</loc>
+    <loc>http://example.org/</loc>
     <lastmod>2022-06-15T14:16:39+08:00</lastmod>
   </url><url>
-    <loc>https://tilemoon.life/2022/typescript-generic-guide/</loc>
+    <loc>http://example.org/2022/typescript-generic-guide/</loc>
     <lastmod>2022-06-15T14:16:39+08:00</lastmod>
   </url><url>
-    <loc>https://tilemoon.life/categories/</loc>
+    <loc>http://example.org/categories/</loc>
   </url><url>
-    <loc>https://tilemoon.life/tags/</loc>
+    <loc>http://example.org/tags/</loc>
   </url>
 </urlset>
