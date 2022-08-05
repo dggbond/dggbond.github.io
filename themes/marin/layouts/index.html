@@ -13,9 +13,14 @@
   {{ partial "pagination.html" . }}
   {{ range $paginator.Pages }}
     <div class="home-post">
-      <a class="home-post-title" href="{{ .Permalink }}">{{ .Title }}</a>
-      <div class="home-post-summary markdown-body">{{ .Summary }}</div>
-      <div class="home-post-date">{{ .Date.Format "2006-01-02" }}</div>
+      <div class="home-post-header">
+        <a class="home-post-title" href="{{ .Permalink }}">{{ .Title }}</a>
+        <div class="home-post-date">{{ .Date.Format "2006-01-02" }}</div>
+      </div>
+      <div class="home-post-content">
+        <div class="home-post-summary markdown-body">{{ .Summary }}</div>
+        <img class="home-post-cover" src="{{ .Params.Cover | absURL }}" />
+      </div>
     </div>
   {{ end }}
 </div>

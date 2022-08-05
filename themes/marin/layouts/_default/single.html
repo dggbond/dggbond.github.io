@@ -1,5 +1,8 @@
 {{ define "title" }}
 <title> {{ .Title }} &middot; {{ .Site.Title }} </title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tocbot@4.18.2/dist/tocbot.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/tocbot@4.18.2/dist/tocbot.css">
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/tocbot@4.18.2/dist/styles.css">
 {{ end }}
 
 {{ define "main"}}
@@ -10,10 +13,18 @@
 
   <section class="single-post markdown-body">
     <h1 class="single-post-title"><a href="{{ .Permalink }}">{{ .Title }}</a></h1>
-    <span class="single-post-date">{{ .Date.Format "2006-01-02 11:11" }}</span>
+    <div class="single-post-date">{{ .Date.Format "2006-01-02 11:11" }}</div>
     <div class="single-post-content">
       {{ .Content | safeHTML }}
     </div>
   </section>
 </div>
+<script>
+  tocbot.init({
+    tocSelector: '.table-of-content',
+    contentSelector: '.single-post-content',
+    headingSelector: 'h1, h2, h3',
+    hasInnerContainers: true,
+  });
+</script>
 {{ end }}

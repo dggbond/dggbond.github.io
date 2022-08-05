@@ -1,12 +1,26 @@
 ---
-title: "TypeScript 范型指北"
+title: "TypeScript 范型使用场景"
 date: 2022-06-15T14:16:39+08:00
 draft: false
 language: cn
 type: page
+cover: images/typescript-generics.png
 ---
-先看下面这个场景，`Order` 和 `Article` 中都有属性 `id`：
+作为一个使用了两年 ts 的人，从来没有深入了解过其中的范型系统，大多数时候都是 any 一把梭（AnyScript emmm...）。
+
+<!--more-->
+在写 ts 的大部分时候，都没有主动的想过使用范型去解决某些问题，所以这里主要列出一下我们需要在什么场景下使用范型
+以及在这些场景下使用范型的好处
+## 场景一
 ```typescript
+interface Order {
+  id: string,
+  ...
+}
+interface Aticle {
+  id: string,
+  ...
+}
 const searchOrder = (list: Order[], id: string): Order => {...}
 const searchArtice = (list: Artice[], id: string): Article => {...}
 ```
@@ -24,4 +38,5 @@ const search = <T extends { id: string }>(list: T[], id: string): T => {...}
 ```
 
 这样 `search` 函数就可以完美的识别入参并返回正确的类型
-<!--more-->
+
+## 场景二
