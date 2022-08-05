@@ -6,9 +6,9 @@
     </head>
     <body class="theme-light">
         {{- partial "header.html" . -}}
-        <div id="main">
+        <main id="main">
         {{- block "main" . }}{{- end }}
-        </div>
+        </main>
         {{- partial "footer.html" . -}}
         <script type="text/javascript" src="{{ "js/index.js" | absURL }}"></script>
     </body>
