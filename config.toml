@@ -1,7 +1,8 @@
 baseURL = 'https://tilemoon.life/'
 languageCode = 'en-us'
 title = 'Tilemoon Blog'
-theme = 'Marin'
+theme = 'marin'
+themesDir = './themes'
 
 [markup]
   [markup.asciidocExt]
