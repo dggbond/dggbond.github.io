@@ -11,13 +11,12 @@ function loadGithubMarkdownCSS(theme) {
     return
   }
 
-  const head  = document.querySelector('head');
   const link  = document.createElement('link');
   link.id = id
   link.rel  = 'stylesheet';
   link.type = 'text/css';
   link.href = href
-  head.appendChild(link);
+  document.head.appendChild(link);
 }
 
 function toggleCSS(el, firstCSS, secondCSS = "") {
@@ -47,5 +46,18 @@ function initTheme() {
     toggleTheme()
   }
   loadGithubMarkdownCSS(theme)
+
+  // set transition for theme change
+  const style = document.createElement('style')
+  document.head.appendChild(style)
+
+  // style will effect immediately without settimeout
+  setTimeout(() => {
+    style.sheet.insertRule(`* {
+      transition-property: color, background-color, border;
+      transition-duration: 0.15s;
+      transition-timing-function: ease-out;
+    }`, 0);
+  })
 }
 initTheme()

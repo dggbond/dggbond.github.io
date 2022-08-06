@@ -17,12 +17,12 @@
     </item>
     
     <item>
-      <title>TypeScript 范型使用场景</title>
+      <title>TypeScript 范型使用场景指北</title>
       <link>https://tilemoon.life/2022/typescript-generic-guide/</link>
       <pubDate>Wed, 15 Jun 2022 14:16:39 +0800</pubDate>
       
       <guid>https://tilemoon.life/2022/typescript-generic-guide/</guid>
-      <description>&lt;p&gt;作为一个使用了两年 ts 的人，从来没有深入了解过其中的范型系统，大多数时候都是 any 一把梭（AnyScript emmm&amp;hellip;）。&lt;/p&gt;</description>
+      <description>&lt;p&gt;作为一个使用了很长时间 ts 的人，从来没有深入了解过其中的范型系统，大多数时候都是 any 一把梭（AnyScript emmm&amp;hellip;）。&lt;/p&gt;</description>
     </item>
     
   </channel>

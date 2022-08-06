@@ -1,15 +1,15 @@
 <header>
-  <div class="header-leading space-12">
+  <div class="header-leading space-s">
     <a class="action-btn" href="//github.com/tilemoon" target="_blank">
       <i class="fa fa-github fa-lg" aria-hidden="true"></i>
     </a>
   </div>
-  <div class="header-menus space-24">
+  <div class="header-menus space-m">
     {{ range .Site.Menus.main}}
       <a class="header-menu-item" href="{{ .URL }}">{{ .Name }}</a>
     {{ end }}
   </div>
-  <div class="header-actions space-12">
+  <div class="header-actions space-s">
     <button id="theme-toggle" class="action-btn" onclick="toggleTheme()">
       <i class="fa fa-sun-o fa-lg" aria-hidden="true"></i>
     </button>
