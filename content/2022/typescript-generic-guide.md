@@ -1,7 +1,7 @@
 ---
 title: "TypeScript 范型使用场景指北"
 date: 2022-06-15T14:16:39+08:00
-draft: false
+draft: true
 language: cn
 type: page
 cover: images/typescript-generics.png

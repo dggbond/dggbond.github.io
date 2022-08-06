@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-	<meta name="generator" content="Hugo 0.100.2" />
-<title> Tilemoon Blog </title>
+<title> React Theme Manager &middot; Tilemoon Blog </title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tocbot@4.18.2/dist/tocbot.min.js"></script>
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/tocbot@4.18.2/dist/tocbot.css">
+<link type="text/css" href="https://cdn.jsdelivr.net/npm/tocbot@4.18.2/dist/styles.css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <meta name="keywords" content="github,">
@@ -37,31 +39,27 @@
   </div>
 </header>
 <main id="main">
-<div class="quotes">
-  <div>First, solve the problem.</div>
-  <div>Then, write the code.</div>
-</div>
+<div class="content">
+  <div class="table-of-content">
+    <nav id="TableOfContents"></nav>
+  </div>
 
-<div class="posts">
-  
-  <div class="pagination">
-  
-  
-</div>
-
-  
-    <div class="home-post markdown-body">
-      <div class="home-post-header">
-        <a class="home-post-title" href="https://tilemoon.life/2022/react-theme-manager/">React Theme Manager</a>
-        <div class="home-post-date">2022-08-07</div>
-      </div>
-      <div class="home-post-content">
-        <div class="home-post-summary"><p>如何用 React 实现一套完整的主题切换方案</p></div>
-        
-      </div>
+  <section class="single-post markdown-body">
+    <h1 class="single-post-title"><a href="https://tilemoon.life/2022/react-theme-manager/">React Theme Manager</a></h1>
+    <div class="single-post-date">2022-08-07 01:48</div>
+    <div class="single-post-content">
+      <p>如何用 React 实现一套完整的主题切换方案</p>
     </div>
-  
+  </section>
 </div>
+<script>
+  tocbot.init({
+    tocSelector: '.table-of-content',
+    contentSelector: '.single-post-content',
+    headingSelector: 'h1, h2, h3',
+    hasInnerContainers: true,
+  });
+</script>
 
         </main><div  class="footer">
 </div>
