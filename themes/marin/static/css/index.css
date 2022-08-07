@@ -152,7 +152,7 @@ header {
 #main {
   width: 60vw;
   min-width: 400px;
-  margin: 0px auto 160px;
+  margin: 0px auto 10vh;
 }
 
 /*====== home ======*/
@@ -257,7 +257,11 @@ header {
   margin: 0px;
 }
 
-@media screen and (max-width: 400px) {
+.table-of-content ol {
+  padding-left: 16px;
+}
+
+@media screen and (max-width: 540px) {
   html {
     font-size: 14px;
   }
