@@ -41,7 +41,31 @@
 <main id="main">
 <div class="content">
   <div class="table-of-content">
-    <nav id="TableOfContents"></nav>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#设计">设计</a></li>
+    <li><a href="#代码实现">代码实现</a>
+      <ul>
+        <li><a href="#themeprovider">ThemeProvider</a></li>
+        <li><a href="#render-theme">Render Theme</a></li>
+        <li><a href="#usetheme">useTheme</a></li>
+      </ul>
+    </li>
+    <li><a href="#实践优化">实践优化</a>
+      <ul>
+        <li><a href="#usetheme-类型补全">useTheme 类型补全</a></li>
+        <li><a href="#inline-style-支持">inline style 支持</a></li>
+        <li><a href="#colors-类型提示">colors 类型提示</a></li>
+      </ul>
+    </li>
+    <li><a href="#细节打磨">细节打磨</a>
+      <ul>
+        <li><a href="#渐变转换">渐变转换</a></li>
+        <li><a href="#存储上次主题">存储上次主题</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
   </div>
 
   <section class="single-post markdown-body">
@@ -49,6 +73,216 @@
     <div class="single-post-date">2022-08-07 01:48</div>
     <div class="single-post-content">
       <p>如何用 React 实现一套完整的主题切换方案</p>
+<h2 id="设计">设计</h2>
+<p>像这种全局配置的场景，用 <code>context</code> 来实现基本上是再适合不过了，所以大致思路就是：</p>
+<ul>
+<li>生产端：使用 <code>context provider</code> 实现 <code>ThemeManagerProvider</code></li>
+<li>配置端：用户可以基于提供的基本配置类型 <code>ThemeConfig</code> 来配置自己的主题类型</li>
+<li>消费端：使用 <code>useContext</code> 实现 <code>useTheme</code></li>
+</ul>
+<p>接下来考虑的就是 <code>ThemeConfig</code> 需要支持哪些内容，在我看来至少需要支持下面这些内容：</p>
+<ul>
+<li>最基本的需要支持 <code>colors</code> 的配置，提供不同主题下的颜色使用</li>
+<li>动态的 css 导入，在某些场景下使用第三方 cdn css 的时候，可能需要提供不同的 css 地址</li>
+<li>其他各种自定义字段的配置，比如 icon，图片这些内容，这些内容用户自己配置即可</li>
+</ul>
+<h2 id="代码实现">代码实现</h2>
+<h3 id="themeprovider">ThemeProvider</h3>
+<p>根据我们的基本思路，使用 <code>React.createContext()</code> 构建一个 context 对象，然后将其 <code>Provider</code> 包装一下即可，
+大致的代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ThemeManagerProps</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">theme</span>: <span style="color:#66d9ef">ThemeConfig</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">setTheme</span>: <span style="color:#66d9ef">React.Dispatch</span>&lt;<span style="color:#f92672">React.SetStateAction</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#a6e22e">ThemeConfig</span>&gt;<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ctx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">React</span>.<span style="color:#a6e22e">createContext</span>&lt;<span style="color:#f92672">ThemeManagerProps</span>&gt;({} <span style="color:#66d9ef">as</span> <span style="color:#a6e22e">ThemeManagerProps</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ThemeManagerProviderProps</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">defaultTheme</span>: <span style="color:#66d9ef">ThemeConfig</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">children</span>: <span style="color:#66d9ef">React.ReactNode</span> <span style="color:#f92672">|</span> <span style="color:#a6e22e">React</span>.<span style="color:#a6e22e">ReactNode</span>[]
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ThemeManagerProvider</span>: <span style="color:#66d9ef">React.FC</span>&lt;<span style="color:#f92672">ThemeManagerProviderProps</span>&gt; <span style="color:#f92672">=</span> ({ <span style="color:#a6e22e">defaultTheme</span>, <span style="color:#a6e22e">children</span> }) <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> [<span style="color:#a6e22e">theme</span>, <span style="color:#a6e22e">setTheme</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">React</span>.<span style="color:#a6e22e">useState</span>&lt;<span style="color:#f92672">ThemeConfig</span>&gt;(<span style="color:#a6e22e">defaultTheme</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">React</span>.<span style="color:#a6e22e">useEffect</span>(() <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// TODO：这里待会需要实现对于主题的渲染操作
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// 比如设置 css 变量，获取 css 链接 等
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">renderTheme</span>(<span style="color:#a6e22e">theme</span>)
+</span></span><span style="display:flex;"><span>  }, [<span style="color:#a6e22e">theme</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> &lt;<span style="color:#f92672">ctx.Provider</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span>{{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">theme</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">setTheme</span>,
+</span></span><span style="display:flex;"><span>  }}&gt;
+</span></span><span style="display:flex;"><span>    {<span style="color:#a6e22e">children</span>}
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">ctx.Provider</span>&gt;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#a6e22e">ctx</span>
+</span></span></code></pre></div><h3 id="render-theme">Render Theme</h3>
+<p>Theme 的渲染最主要的就是将设置好的 colors 设置到浏览器中，在这个过程中我们需要做几件事情：</p>
+<ol>
+<li>将变量名从驼峰转换成 css variable 使用的格式，eg: <code>primaryColor -&gt; --primary-color</code></li>
+<li>让 css 变量生效</li>
+</ol>
+<p>转驼峰的逻辑比较简单，使用 <code>replace</code> 方法 + 正则即可完成:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#75715e">// convert camel-style variable to css variable style
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// eg: primaryColor --&gt; --primary-color
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">convertCamelToCssVar</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">camelName</span>: <span style="color:#66d9ef">string</span>) <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;--&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">camelName</span>.<span style="color:#a6e22e">replace</span>(<span style="color:#e6db74">/([A-Z])/</span>, (<span style="color:#a6e22e">$</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;-&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">$</span>.<span style="color:#a6e22e">toLowerCase</span>())
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>接下来就是让变量生效，这里可以使用 <a href="https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule"><code>CSSStyleSheet.insertRule</code></a> 来实现插入 css 的操作，为了不在每次切换主题的时候都会重复的插入 style，这里需要使用
+一个固定的 <code>id</code>，当发生切换的时候，需要将之前的 style 移除，保证只有新的 style 生效。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ThemeConfig</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">colors</span>: <span style="color:#66d9ef">Record</span>&lt;<span style="color:#f92672">string</span><span style="color:#960050;background-color:#1e0010">,</span> <span style="color:#a6e22e">string</span>&gt;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">THEME_STYLE_ID</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;theme-style&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">renderTheme</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">theme</span>: <span style="color:#66d9ef">ThemeConfig</span>) <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/// check if there exist theme style or not
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">/// if there is, delete first
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">existStyle</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">`style#</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">THEME_STYLE_ID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">existStyle</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">existStyle</span>.<span style="color:#a6e22e">remove</span>()
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">style</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#39;style&#39;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">THEME_STYLE_ID</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  document.<span style="color:#a6e22e">head</span>.<span style="color:#a6e22e">appendChild</span>(<span style="color:#a6e22e">style</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">sheet</span><span style="color:#f92672">?</span>.<span style="color:#a6e22e">insertRule</span>(<span style="color:#e6db74">`:root {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    </span><span style="color:#e6db74">${</span>Object.<span style="color:#a6e22e">entries</span>(<span style="color:#a6e22e">theme</span>.<span style="color:#a6e22e">colors</span>).<span style="color:#a6e22e">map</span>(([<span style="color:#a6e22e">k</span>, <span style="color:#a6e22e">v</span>])<span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">convertCamelToCssVar</span>(<span style="color:#a6e22e">k</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">v</span><span style="color:#e6db74">}</span><span style="color:#e6db74">;`</span>).<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#39;\n&#39;</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }`</span>, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="usetheme">useTheme</h3>
+<p><code>useTheme</code> 的实现也非常简单，直接返回 ctx 的内容即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">useTheme</span> <span style="color:#f92672">=</span> ()<span style="color:#f92672">:</span> <span style="color:#a6e22e">ThemeManagerProps</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">useContext</span>(<span style="color:#a6e22e">ctx</span>)
+</span></span></code></pre></div><h2 id="实践优化">实践优化</h2>
+<p>接下来就是在实际的项目中使用我们写的主题管理了，下面是我简单定义的两个主题：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">MyThemeConfig</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">ThemeConfig</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">name</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ThemeLight</span>: <span style="color:#66d9ef">MyThemeConfig</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;light&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">colors</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fontColor</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;black&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">backgroundColor</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;white&#39;</span>,
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ThemeDark</span>: <span style="color:#66d9ef">MyThemeConfig</span> <span style="color:#f92672">=</span> ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">themes</span>: <span style="color:#66d9ef">Record</span>&lt;<span style="color:#f92672">string</span><span style="color:#960050;background-color:#1e0010">,</span> <span style="color:#a6e22e">MyThemeConfig</span>&gt; <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">light</span>: <span style="color:#66d9ef">ThemeLight</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">dark</span>: <span style="color:#66d9ef">ThemeDark</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>生产端使用 <code>ThemeManagerProvider</code>，并没有什么问题</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span>  &lt;<span style="color:#f92672">ThemeManagerProvider</span> <span style="color:#a6e22e">defaultTheme</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">themes</span>.<span style="color:#a6e22e">light</span>}&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">App</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">ThemeManagerProvider</span>&gt;
+</span></span></code></pre></div><h3 id="usetheme-类型补全">useTheme 类型补全</h3>
+<p>消费端使用 <code>useTheme</code>，这里我马上就遇到了第一个问题，由于我们的代码中全部都是使用 <code>ThemeConfig</code> 来作为 Theme 的
+类型，在 <code>useTheme</code> 中拿到的 <code>theme</code> 并不是我们自己定义的 <code>MyThemeConfig</code>，所以就无法访问里面的 <code>name</code> 属性</p>
+<p><img src="/images/theme-config-no-property.jpg" alt="ThemeConfig no property"></p>
+<p>如何解决这个问题？因为我们没办法强制定义用户要使用的 Theme 类型，这个时候 <a href="https://www.typescriptlang.org/docs/handbook/2/generics.html"><code>范型</code></a>就派上用场了</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#75715e">// Provider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ThemeManagerProps</span>&lt;<span style="color:#f92672">T</span> <span style="color:#a6e22e">extends</span> <span style="color:#a6e22e">ThemeConfig</span>&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">theme</span>: <span style="color:#66d9ef">T</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">setTheme</span>: <span style="color:#66d9ef">React.Dispatch</span>&lt;<span style="color:#f92672">React.SetStateAction</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#a6e22e">T</span>&gt;<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 由于这里并没有什么方式可以让用户把类型给传进来，所以这里就写 any 即可
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ctx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">React</span>.<span style="color:#a6e22e">createContext</span>&lt;<span style="color:#f92672">ThemeManagerProps</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#a6e22e">any</span>&gt;<span style="color:#f92672">&gt;</span>({} <span style="color:#66d9ef">as</span> <span style="color:#a6e22e">ThemeManagerProps</span>&lt;<span style="color:#f92672">any</span>&gt;)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// useTheme
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">useTheme</span> <span style="color:#f92672">=</span> &lt;<span style="color:#f92672">T</span> <span style="color:#a6e22e">extends</span> <span style="color:#a6e22e">ThemeConfig</span>&gt;()<span style="color:#f92672">:</span> <span style="color:#a6e22e">ThemeManagerProps</span>&lt;<span style="color:#f92672">T</span>&gt; <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">useContext</span>(<span style="color:#a6e22e">ctx</span>)
+</span></span></code></pre></div><p>使用范型改写后，再使用 <code>useTheme&lt;MyThemeConfig&gt;()</code> 就可以完美支持自定义的主题类型了。</p>
+<p>目前咱们的主题切换效果：</p>
+<p><img src="/images/theme-manager-sample1.gif" alt="ThemeManager Sample"></p>
+<p>截止目前，整个主题管理已经可以正常的运行了🎉🎉🎉</p>
+<h3 id="inline-style-支持">inline style 支持</h3>
+<p>在某些时候，我们在写样式为了图方便会直接写在 <code>style</code> 中，整个时候再去写 <code>var(--font-color)</code> 这种写法就显得不是很友好了，
+所以我们需要提供一种方式能够直接读到对应的变量，比较简单粗暴的方式就是直接增加一个转换方法即可，实现如下</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">v</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">colorName</span>: <span style="color:#66d9ef">string</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">`var(</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">convertCamelToCssVar</span>(<span style="color:#a6e22e">colorName</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">)`</span>
+</span></span></code></pre></div><p>这样在写 style 的时候，就可以直接使用 <code>v(theme.colors.xxx)</code> 即可</p>
+<h3 id="colors-类型提示">colors 类型提示</h3>
+<p>使用的过程中会发现，我们在使用 <code>colors</code> 的时候，ts 并不会告诉我们其中有哪些字段，这样我们需要经常去查，
+所以这里我们也需要使用范型对其进行改造</p>
+<p>第一步：改造 <code>ThemeConfig</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ThemeConfig</span>&lt;<span style="color:#f92672">T</span> <span style="color:#960050;background-color:#1e0010">=</span> {}&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">colors</span>: <span style="color:#66d9ef">T</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>第二步：改造 <code>MyThemeConfig</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ThemeColors</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fontColor</span>: <span style="color:#66d9ef">string</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">backgroundColor</span>: <span style="color:#66d9ef">string</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">MyThemeConfig</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">ThemeConfig</span>&lt;<span style="color:#f92672">ThemeColors</span>&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">name</span>: <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>经过这两步改造之后，在读取 theme 中的 <code>colors</code> 就可以完美的享受类型提示了</p>
+<p><img src="/images/theme-colors-fix.jpg" alt="Theme Colors Fix"></p>
+<h2 id="细节打磨">细节打磨</h2>
+<h3 id="渐变转换">渐变转换</h3>
+<p>目前的主题切换，颜色的过渡会非常生硬，所以可以加上一定的过渡动画来让其变得舒服些。</p>
+<p>思路其实非常简单，直接给所有的元素都加上 <code>transition</code> 即可，和插入 Theme Style 不同的是，这里
+只需要插入一次就可以了</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">insertTransitionStyle</span> <span style="color:#f92672">=</span> () <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/// check if there exist theme style or not
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">/// if there is, return
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">existStyle</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">`style#</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">TRANSITION_STYLE_ID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">existStyle</span>) <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">style</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#39;style&#39;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">TRANSITION_STYLE_ID</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  document.<span style="color:#a6e22e">head</span>.<span style="color:#a6e22e">appendChild</span>(<span style="color:#a6e22e">style</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">sheet</span><span style="color:#f92672">?</span>.<span style="color:#a6e22e">insertRule</span>(<span style="color:#e6db74">`* {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    transition-property: color, background-color, border;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    transition-duration: 0.15s;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    transition-timing-function: ease-out;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  }`</span>, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>改造后的效果：
+<img src="/images/theme-manager-transition.gif" alt="ThemeManager Transition"></p>
+<h3 id="存储上次主题">存储上次主题</h3>
+<p>当然，在用户切换主题之后，最好是可以记录一下用户上一次存储的主题，很明显这里直接使用 <code>localStorage</code> 记录下
+上次切换的主题，并在初始化的时候读取即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">ThemeConfig</span> } <span style="color:#66d9ef">from</span> <span style="color:#e6db74">&#34;./theme-render&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">THEME_STORAGE_KEY</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;theme&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">load</span> <span style="color:#f92672">=</span> ()<span style="color:#f92672">:</span> <span style="color:#a6e22e">ThemeConfig</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">themeJson</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">localStorage</span>.<span style="color:#a6e22e">getItem</span>(<span style="color:#a6e22e">THEME_STORAGE_KEY</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">themeJson</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">themeJson</span>) <span style="color:#66d9ef">as</span> <span style="color:#a6e22e">ThemeConfig</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">save</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">theme</span>: <span style="color:#66d9ef">ThemeConfig</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">localStorage</span>.<span style="color:#a6e22e">setItem</span>(<span style="color:#a6e22e">THEME_STORAGE_KEY</span>, <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">theme</span>))
+</span></span></code></pre></div><p>Provider 改动：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ThemeManagerProvider</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">props</span>) <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> [<span style="color:#a6e22e">theme</span>, <span style="color:#a6e22e">setTheme</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">React</span>.<span style="color:#a6e22e">useState</span>(<span style="color:#a6e22e">load</span>() <span style="color:#f92672">??</span> <span style="color:#a6e22e">props</span>.<span style="color:#a6e22e">defaultTheme</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">React</span>.<span style="color:#a6e22e">useEffect</span>(() <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">save</span>(<span style="color:#a6e22e">theme</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">renderTheme</span>(<span style="color:#a6e22e">theme</span>)
+</span></span><span style="display:flex;"><span>  }, [<span style="color:#a6e22e">theme</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> ...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>完整的项目地址：<a href="https://github.com/tilemoon/react-theme-manager">react-theme-manager</a></p>
     </div>
   </section>
 </div>

@@ -4,6 +4,8 @@ title = 'Tilemoon Blog'
 theme = 'marin'
 themesDir = './themes'
 
+enableEmoji=true
+
 [markup]
   defaultMarkdownHandler = "goldmark"
 
