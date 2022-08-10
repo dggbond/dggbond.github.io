@@ -43,12 +43,19 @@ body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--background-color);
+
+  display: flex;
+  flex-direction: column;
 }
 
 a {
   color: var(--font-color);
   cursor: pointer;
   text-decoration: none;
+}
+
+a:hover {
+  color: var(--tint-color);
 }
 
 button {
@@ -105,7 +112,17 @@ button {
 }
 
 .action-btn:hover {
+  color: var(--font-color);
   background-color: var(--deep-foil-color);
+}
+
+.footer {
+  font-size: 0.8rem;
+  height: 44px;
+  color: var(--font-color);
+  width: 100vw;
+  text-align: center;
+  line-height: 44px;
 }
 
 /*====== Header ======*/
@@ -150,9 +167,10 @@ header {
 /*====== main ======*/
 
 #main {
+  flex: 1;
   width: 60vw;
   min-width: 400px;
-  margin: 0px auto 10vh;
+  margin: 0px auto 40px;
 }
 
 /*====== home ======*/
@@ -260,6 +278,8 @@ header {
 .table-of-content ol {
   padding-left: 16px;
 }
+
+
 
 @media screen and (max-width: 540px) {
   html {
